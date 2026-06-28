@@ -1,0 +1,32 @@
+name: phneak_teb
+description: "Phneak Teb – Divine Eye for Safer Links. A Blue Team cybersecurity mobile app that scans URLs and QR codes to detect phishing and malicious links."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  local_auth: ^2.1.8
+  mobile_scanner: ^3.5.5
+  sqflite: ^2.3.0
+  path_provider: ^2.1.1
+  http: ^1.1.0
+  shared_preferences: ^2.2.2
+  intl: ^0.18.1
+  flutter_svg: ^2.0.9
+  url_launcher: ^6.2.1
+  share_plus: ^7.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/bad_urls.json
