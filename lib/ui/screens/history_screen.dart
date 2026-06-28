@@ -21,7 +21,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<UrlRecordModel> _filteredRecords = [];
   String _selectedFilter = 'all'; // all, safe, warning, dangerous
   bool _isLoading = true;
-  bool _isSearching = false;
 
   @override
   void initState() {
@@ -72,16 +71,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void _setFilter(String filter) {
     setState(() => _selectedFilter = filter);
     _applyFilter();
-  }
-
-  void _toggleSearch() {
-    setState(() {
-      _isSearching = !_isSearching;
-      if (!_isSearching) {
-        _searchController.clear();
-        _applyFilter();
-      }
-    });
   }
 
   Future<void> _deleteRecord(UrlRecordModel record) async {
@@ -173,40 +162,95 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Search bar and actions
-        if (_isSearching) _buildSearchBar(),
-        // Filter chips
-        _buildFilterChips(),
-        // Content
-        Expanded(child: _buildContent()),
-      ],
+    return Container(
+      color: AppTheme.canvas,
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            _buildHeader(),
+            _buildSearchBar(),
+            _buildFilterChips(),
+            const SizedBox(height: 4),
+            Expanded(child: _buildContent()),
+          ],
+        ),
+      ),
     );
   }
 
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppTheme.primaryPurpleSoft,
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: const Icon(Icons.history_rounded,
+                color: AppTheme.primaryPurple, size: 22),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Scan History',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.ink,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                Text(
+                  'All your past scans',
+                  style: TextStyle(fontSize: 12.5, color: AppTheme.inkMuted),
+                ),
+              ],
+            ),
+          ),
+          if (_allRecords.isNotEmpty)
+            IconButton(
+              onPressed: _clearAllHistory,
+              icon: const Icon(Icons.delete_sweep_rounded),
+              color: AppTheme.dangerRed,
+              tooltip: 'Clear all',
+            ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
       child: TextField(
         controller: _searchController,
         onChanged: _onSearchChanged,
+        style: const TextStyle(
+            fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.ink),
+        cursorColor: AppTheme.primaryPurple,
         decoration: InputDecoration(
-          hintText: 'Search URLs...',
+          isDense: true,
+          hintText: 'Search URLs…',
           prefixIcon:
-              const Icon(Icons.search, color: AppTheme.primaryPurple),
-          suffixIcon: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: _toggleSearch,
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            borderSide: BorderSide(color: AppTheme.mediumGray),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              const Icon(Icons.search_rounded, color: AppTheme.inkFaint, size: 21),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 18),
+                  color: AppTheme.inkFaint,
+                  onPressed: () {
+                    _searchController.clear();
+                    _applyFilter();
+                  },
+                )
+              : null,
         ),
       ),
     );
@@ -214,63 +258,47 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildFilterChips() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Row(
-        children: [
-          _buildFilterChip('All', 'all'),
-          const SizedBox(width: 8),
-          _buildFilterChip('Safe', 'safe', AppTheme.safeGreen),
-          const SizedBox(width: 8),
-          _buildFilterChip('Warning', 'warning', AppTheme.warningYellow),
-          const SizedBox(width: 8),
-          _buildFilterChip('Danger', 'dangerous', AppTheme.dangerRed),
-          const Spacer(),
-          // Action icons
-          IconButton(
-            icon: const Icon(Icons.search, size: 22),
-            onPressed: _toggleSearch,
-            color: AppTheme.primaryPurple,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_sweep, size: 22),
-            onPressed: _allRecords.isEmpty ? null : _clearAllHistory,
-            color: AppTheme.dangerRed,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-          ),
-        ],
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Row(
+          children: [
+            _buildFilterChip('All', 'all'),
+            const SizedBox(width: 8),
+            _buildFilterChip('Safe', 'safe', AppTheme.safeGreen),
+            const SizedBox(width: 8),
+            _buildFilterChip('Warning', 'warning', AppTheme.warningYellow),
+            const SizedBox(width: 8),
+            _buildFilterChip('Dangerous', 'dangerous', AppTheme.dangerRed),
+          ],
+        ),
       ),
     );
   }
 
-
   Widget _buildFilterChip(String label, String filter, [Color? color]) {
     final isSelected = _selectedFilter == filter;
+    final c = color ?? AppTheme.primaryPurple;
     return GestureDetector(
       onTap: () => _setFilter(filter),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (color ?? AppTheme.primaryPurple).withOpacity(0.15)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? c : AppTheme.surface,
+          borderRadius: BorderRadius.circular(50),
           border: Border.all(
-            color: isSelected
-                ? (color ?? AppTheme.primaryPurple)
-                : AppTheme.mediumGray,
+            color: isSelected ? c : AppTheme.hairline,
           ),
+          boxShadow: isSelected ? AppTheme.shadowSm : null,
         ),
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            color: isSelected
-                ? (color ?? AppTheme.primaryPurple)
-                : Colors.grey[600],
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: isSelected ? Colors.white : AppTheme.inkMuted,
           ),
         ),
       ),
@@ -308,12 +336,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
       onRefresh: _loadHistory,
       color: AppTheme.primaryPurple,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        padding: const EdgeInsets.fromLTRB(16, 6, 16, 110),
         itemCount: _filteredRecords.length,
         itemBuilder: (context, index) {
           final record = _filteredRecords[index];
           return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: 10),
             child: HistoryItemCard(
               record: record,
               onTap: () => _viewResult(record),

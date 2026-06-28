@@ -46,15 +46,19 @@ class AppTextField extends StatelessWidget {
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       focusNode: focusNode,
-      style: const TextStyle(fontSize: 15),
+      style: const TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: AppTheme.ink,
+      ),
+      cursorColor: AppTheme.primaryPurple,
       decoration: InputDecoration(
         hintText: hintText,
         labelText: labelText,
         prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, color: AppTheme.primaryPurple)
+            ? Icon(prefixIcon, color: AppTheme.primaryPurple, size: 21)
             : null,
         suffixIcon: suffixWidget,
-        hintStyle: TextStyle(color: Colors.grey[400]),
       ),
     );
   }

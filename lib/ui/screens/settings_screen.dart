@@ -92,22 +92,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppTheme.spacingMD),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildAppInfoCard(),
-          const SizedBox(height: 16),
-          _buildPreferencesSection(),
-          const SizedBox(height: 16),
-          _buildDataSection(),
-          const SizedBox(height: 16),
-          _buildSafetyTipsCard(),
-          const SizedBox(height: 16),
-          _buildAboutSection(),
-          const SizedBox(height: 24),
-        ],
+    return Container(
+      color: AppTheme.canvas,
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 14, 20, 8),
+              child: Text(
+                'Settings',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.ink,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildAppInfoCard(),
+                    const SizedBox(height: 16),
+                    _buildPreferencesSection(),
+                    const SizedBox(height: 16),
+                    _buildDataSection(),
+                    const SizedBox(height: 16),
+                    _buildSafetyTipsCard(),
+                    const SizedBox(height: 16),
+                    _buildAboutSection(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

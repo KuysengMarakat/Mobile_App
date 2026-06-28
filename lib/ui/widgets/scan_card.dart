@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../utils/app_theme.dart';
 
-/// Card widget for scan actions on the main screen.
+/// Action card for scan actions. Supports an optional gradient "feature"
+/// style for high-emphasis actions.
 class ScanCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
   final Color? iconColor;
-  final Color? cardColor;
+  final bool featured;
 
   const ScanCard({
     super.key,
@@ -17,41 +18,47 @@ class ScanCard extends StatelessWidget {
     required this.icon,
     required this.onTap,
     this.iconColor,
-    this.cardColor,
+    this.featured = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: cardColor ?? Colors.white,
-      elevation: 2,
-      shadowColor: Colors.black12,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-      ),
+    final radius = BorderRadius.circular(AppTheme.radiusMedium);
+    final accent = iconColor ?? AppTheme.primaryPurple;
+
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spacingMD),
+        borderRadius: radius,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: featured ? AppTheme.heroGradient : null,
+            color: featured ? null : AppTheme.surface,
+            borderRadius: radius,
+            border: featured
+                ? null
+                : Border.all(color: AppTheme.hairline, width: 1),
+            boxShadow: featured ? AppTheme.shadowLg : AppTheme.shadowSm,
+          ),
           child: Row(
             children: [
               Container(
-                width: 52,
-                height: 52,
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
-                  color: (iconColor ?? AppTheme.primaryPurple)
-                      .withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(
-                      AppTheme.radiusSmall),
+                  color: featured
+                      ? Colors.white.withOpacity(0.16)
+                      : accent.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
                   icon,
-                  color: iconColor ?? AppTheme.primaryPurple,
-                  size: 26,
+                  color: featured ? AppTheme.accentGold : accent,
+                  size: 24,
                 ),
               ),
-
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -59,27 +66,30 @@ class ScanCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.darkNavy,
+                      style: TextStyle(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w700,
+                        color: featured ? Colors.white : AppTheme.ink,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
+                        fontSize: 12.5,
+                        height: 1.3,
+                        color: featured
+                            ? Colors.white.withOpacity(0.85)
+                            : AppTheme.inkMuted,
                       ),
                     ),
                   ],
                 ),
               ),
               Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Colors.grey[400],
+                Icons.arrow_forward_ios_rounded,
+                size: 15,
+                color: featured ? Colors.white70 : AppTheme.inkFaint,
               ),
             ],
           ),

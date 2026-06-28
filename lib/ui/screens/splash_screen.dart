@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../utils/app_theme.dart';
 import '../../utils/constants.dart';
+import '../widgets/app_widgets.dart';
 import 'login_screen.dart';
 
-/// Beautiful splash screen with divine eye / shield concept.
+/// Animated splash screen featuring the Divine Eye brand mark.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -13,58 +14,44 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _slideAnimation;
+  late final AnimationController _controller;
+  late final Animation<double> _fade;
+  late final Animation<double> _scale;
+  late final Animation<double> _textFade;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 1800),
       vsync: this,
     );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _fade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+    );
+    _scale = Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
       ),
     );
-
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
-      ),
+    _textFade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.4, 1.0, curve: Curves.easeIn),
     );
-
-
-    _slideAnimation = Tween<double>(begin: 30.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
-      ),
-    );
-
     _controller.forward();
 
-    // Navigate to login after animation
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const LoginScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 600),
-          ),
-        );
-      }
+    Future.delayed(const Duration(milliseconds: 2600), () {
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 600),
+          pageBuilder: (_, __, ___) => const LoginScreen(),
+          transitionsBuilder: (_, a, __, child) =>
+              FadeTransition(opacity: a, child: child),
+        ),
+      );
     });
   }
 
@@ -74,128 +61,111 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: AppTheme.splashGradient,
-        ),
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Divine Eye / Shield Icon
-                Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: Opacity(
-                    opacity: _fadeAnimation.value,
-                    child: _buildLogo(),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-                // App Name
-                Transform.translate(
-                  offset: Offset(0, _slideAnimation.value),
-                  child: Opacity(
-                    opacity: _fadeAnimation.value,
-                    child: const Text(
-                      AppConstants.appName,
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 2,
-                      ),
+        decoration: const BoxDecoration(gradient: AppTheme.splashGradient),
+        child: Stack(
+          children: [
+            // soft glow orbs
+            Positioned(
+              top: -60,
+              right: -50,
+              child: _orb(200, AppTheme.accentGold.withOpacity(0.14)),
+            ),
+            Positioned(
+              bottom: 80,
+              left: -60,
+              child: _orb(240, AppTheme.primaryPurpleLight.withOpacity(0.35)),
+            ),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FadeTransition(
+                    opacity: _fade,
+                    child: ScaleTransition(
+                      scale: _scale,
+                      child: const BrandLogo(size: 138),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                // Subtitle
-                Transform.translate(
-                  offset: Offset(0, _slideAnimation.value),
-                  child: Opacity(
-                    opacity: _fadeAnimation.value,
-                    child: const Text(
-                      AppConstants.appSubtitle,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppTheme.accentGold,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.5,
-                      ),
+                  const SizedBox(height: 32),
+                  FadeTransition(
+                    opacity: _textFade,
+                    child: Column(
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (b) => const LinearGradient(
+                            colors: [Colors.white, Color(0xFFF1E3FF)],
+                          ).createShader(b),
+                          child: const Text(
+                            AppConstants.appName,
+                            style: TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          AppConstants.appSubtitle,
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: AppTheme.accentGold.withOpacity(0.95),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'ភ្នែកទេព',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white.withOpacity(0.55),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 60),
-                // Scan line animation indicator
-                Opacity(
-                  opacity: _fadeAnimation.value,
+                ],
+              ),
+            ),
+            // bottom loader
+            Positioned(
+              bottom: 60,
+              left: 0,
+              right: 0,
+              child: FadeTransition(
+                opacity: _textFade,
+                child: Center(
                   child: SizedBox(
-                    width: 40,
-                    height: 40,
+                    width: 30,
+                    height: 30,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: AppTheme.accentGold.withOpacity(0.7),
+                      strokeWidth: 2.4,
+                      color: AppTheme.accentGold.withOpacity(0.8),
                     ),
                   ),
                 ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-
-  /// Build the divine eye / shield logo concept.
-  Widget _buildLogo() {
+  Widget _orb(double size, Color color) {
     return Container(
-      width: 130,
-      height: 130,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(
-          color: AppTheme.accentGold,
-          width: 3,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.accentGold.withOpacity(0.3),
-            blurRadius: 30,
-            spreadRadius: 5,
-          ),
-        ],
-      ),
-      child: Container(
-        margin: const EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withOpacity(0.1),
-        ),
-        child: const Stack(
-          alignment: Alignment.center,
-          children: [
-            // Shield background
-            Icon(
-              Icons.shield,
-              size: 70,
-              color: Colors.white24,
-            ),
-            // Eye icon (divine eye concept)
-            Icon(
-              Icons.visibility,
-              size: 44,
-              color: AppTheme.accentGold,
-            ),
-          ],
-        ),
+        gradient: RadialGradient(colors: [color, color.withOpacity(0)]),
       ),
     );
   }
