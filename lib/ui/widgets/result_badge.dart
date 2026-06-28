@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../utils/app_theme.dart';
 
-/// Badge widget showing scan result status with color and icon.
+/// Pill badge showing scan status with soft tinted background and icon.
 class ResultBadge extends StatelessWidget {
   final String status;
   final bool showLabel;
@@ -17,28 +17,30 @@ class ResultBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = AppTheme.getStatusColor(status);
+    final softColor = AppTheme.getStatusSoftColor(status);
     final icon = AppTheme.getStatusIcon(status);
-    final label = _getLabel();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.symmetric(
+        horizontal: showLabel ? 11 : 7,
+        vertical: 6,
+      ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: softColor,
+        borderRadius: BorderRadius.circular(50),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: size * 0.7),
+          Icon(icon, color: color, size: size * 0.62),
           if (showLabel) ...[
-            const SizedBox(width: 6),
+            const SizedBox(width: 5),
             Text(
-              label,
+              _label(),
               style: TextStyle(
                 color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                fontSize: 12.5,
               ),
             ),
           ],
@@ -47,7 +49,7 @@ class ResultBadge extends StatelessWidget {
     );
   }
 
-  String _getLabel() {
+  String _label() {
     switch (status.toLowerCase()) {
       case 'safe':
         return 'Safe';

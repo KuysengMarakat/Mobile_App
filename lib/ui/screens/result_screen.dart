@@ -14,89 +14,130 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan Result'),
-        backgroundColor: AppTheme.primaryPurple,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppTheme.spacingMD),
-        child: Column(
-          children: [
-            _buildStatusHeader(),
-            const SizedBox(height: 20),
-            _buildUrlCard(),
-            const SizedBox(height: 16),
-            _buildDetailsCard(),
-            const SizedBox(height: 16),
-            _buildReasonsCard(),
-            const SizedBox(height: 24),
-            _buildActionButtons(context),
-          ],
-        ),
+      backgroundColor: AppTheme.canvas,
+      body: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          _buildHero(context),
+          Transform.translate(
+            offset: const Offset(0, -26),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              child: Column(
+                children: [
+                  _buildUrlCard(),
+                  const SizedBox(height: 16),
+                  _buildDetailsCard(),
+                  const SizedBox(height: 16),
+                  _buildReasonsCard(),
+                  const SizedBox(height: 24),
+                  _buildActionButtons(context),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-
-  Widget _buildStatusHeader() {
+  Widget _buildHero(BuildContext context) {
     final color = _getStatusColor();
-    final icon = _getStatusIcon();
-    final title = _getStatusTitle();
-    final subtitle = _getStatusSubtitle();
+    final gradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [color, Color.lerp(color, Colors.black, 0.28)!],
+    );
 
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 46),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        children: [
-          // Status icon with circle
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withOpacity(0.15),
-              border: Border.all(color: color, width: 3),
-            ),
-            child: Icon(icon, color: color, size: 42),
-          ),
-          const SizedBox(height: 16),
-          // Status text
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 6),
-          // Khmer label
-          Text(
-            result.statusKhmer,
-            style: TextStyle(
-              fontSize: 16,
-              color: color.withOpacity(0.8),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 10),
-          // Subtitle explanation
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
-            ),
+        gradient: gradient,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(34),
+          bottomRight: Radius.circular(34),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.35),
+            blurRadius: 28,
+            offset: const Offset(0, 12),
           ),
         ],
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Badge with score ring
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 104,
+                  height: 104,
+                  child: CircularProgressIndicator(
+                    value: result.score / 100,
+                    strokeWidth: 6,
+                    backgroundColor: Colors.white.withOpacity(0.22),
+                    valueColor:
+                        const AlwaysStoppedAnimation(Colors.white),
+                  ),
+                ),
+                Container(
+                  width: 78,
+                  height: 78,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.18),
+                  ),
+                  child: Icon(_getStatusIcon(), color: Colors.white, size: 40),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Text(
+              _getStatusTitle(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${result.statusText} • ${result.statusKhmer}',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withOpacity(0.85),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: Text(
+                _getStatusSubtitle(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.4,
+                  color: Colors.white.withOpacity(0.78),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
